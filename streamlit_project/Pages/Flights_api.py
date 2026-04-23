@@ -45,7 +45,6 @@ direct_choice = "true" if direct_bool == "Yes" else "false"
 search_clicked = st.button("Search")
 
 #Requesting from api
-st.markdown("---")
 
 if search_clicked:
     if not currency_choice.strip() or not dest.strip() or not depart.strip():
@@ -89,21 +88,44 @@ if search_clicked:
                 "Departure Time": item.get("departure_at"),
                 "No. of Transfers": item.get("transfers"),
                 "Flight Number": item.get("flight_number"),
-                 "Approximate Duration (hours)": round((item.get("duration_to") or 0) / 60, 1),
+                 "Approximate Duration (hours)": int(round((item.get("duration_to") or 0) / 60)),
                  "Link": "https://www.aviasales.com" + str(item.get("link") or "")
             })
 
         df = pd.DataFrame(rows)
+        
+        st.subheader("Flight Results")
+        st.markdown("---")
+
+        for _, row in df.iterrows():
+            with st.container():
+                col1, col2, col3 = st.columns([2, 1, 1])
+
+                with col1:
+                    st.markdown(f"### {row['Destination']}")
+                    st.caption(f"With **{row['Airline']}** airline")
+                    st.write(f"**Route:** {row['Starting Airport']} → {row['Destination Airport']}")
+                    st.write(f"**Departure:** {row['Departure Time']}")
+                    st.write(f"**Flight Number:** {row['Flight Number']}")
+
+                with col2:
+                    st.metric("", f"{currency_choice.strip().upper()} {row['Price']}")
+                    st.write(f"**Transfers:** {row['No. of Transfers']}")
+                    st.write(f"**Duration:** ~{row['Approximate Duration (hours)']} hrs")
+
+                with col3:
+                    st.markdown(f"[Open Flight Link]({row['Link']})")
+
+                st.markdown("---")
 
         if not df.empty:
                 st.subheader("Results Overview")
 
-                colA, colB, colC = st.columns(3)
+                colA, colB= st.columns(2)
                 colA.metric("Flights Found", len(df))
-                colB.metric("Cheapest Price", f"{currency_choice.strip().upper()} {df['Price'].min()}")
-                colC.metric("Average Price", f"{currency_choice.strip().upper()} {round(df['Price'].mean(), 2)}")
+                colB.metric("Average Price", f"{currency_choice.strip().upper()} {round(df['Price'].mean(), 2)}")
 
-                st.subheader("Flight Results")
-                st.dataframe(df, use_container_width=True)
+                #st.subheader("Flight Results")
+                #st.dataframe(df, use_container_width=True)
         else:
             st.warning("No flight data found for that search.")
