@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 from datetime import datetime 
 import time
 
-st.title("Cheap Live Flight Tickets")
+#Page formatting
+st.set_page_config(page_title="Cheap Live Flight Tickets", page_icon="✈️", layout="wide")
+
+st.title("✈️ Cheap Live Flight Tickets")
+st.caption("Search for low-cost flights for your chosen destination.")
 
 #from pathlib import Path
 
@@ -16,20 +20,32 @@ st.title("Cheap Live Flight Tickets")
 #codes_df = pd.read_csv(csv_path.resolve(), encoding="latin-1")
 #codes_df = pd.read_csv("iata_codes_clean.csv", encoding = "latin-1")
 
+#User input
 load_dotenv()
 #TRAVELPAYOUTS_TOKEN = "09e2f28e8bb7c3afdd252db783410cae"
 TOKEN = "09e2f28e8bb7c3afdd252db783410cae"    #os.getenv("TRAVELPAYOUTS_TOKEN")
 
 BASE_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
-dest = st.text_input("What is your desired destination? (IATA code of a city/ airport)")
-depart = st.text_input("What is your planned departure date? (yyyy-mm OR yyyy-mm-dd)")
-direct_bool = st.radio("Do you want direct flights only?", ["Yes", "No"])
-currency_choice = st.text_input("What is you preferred currency choice? (ISO-4217 code)")
+st.markdown("### Search Criteria")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    dest = st.text_input("Desired destination", placeholder = "IATA code of a city or airport, e.g. BKK")
+    depart = st.text_input("Planned departure date", placeholder = "YYYY-MM or YYYY-MM-DD")
+
+with col2:
+    direct_bool = st.radio("Do you want direct flights only?", ["Yes", "No"], horizontal = True)
+    currency_choice = st.text_input("Currency", placeholder = "ISO-4217 code, e.g. GBP")
+
 
 direct_choice = "true" if direct_bool == "Yes" else "false"
 
 search_clicked = st.button("Search")
+
+#Requesting from api
+st.markdown("---")
 
 if search_clicked:
     if not currency_choice.strip() or not dest.strip() or not depart.strip():
@@ -49,8 +65,15 @@ if search_clicked:
             }
 
         response = requests.get(BASE_URL, params=params, timeout=30)
+        response.raise_for_status()
+
+        if not response.text.strip():
+            st.error("The API returned an empty response.")
+            st.stop()
+        
         data = response.json()
 
+#Showing response 
         rows = []
         for item in data.get("data", []):
             #match = codes_df[codes_df["iata_code"] == item.get("destination")]
@@ -66,14 +89,21 @@ if search_clicked:
                 "Departure Time": item.get("departure_at"),
                 "No. of Transfers": item.get("transfers"),
                 "Flight Number": item.get("flight_number"),
-                "Approximate duration (hours)": int(round(item.get("duration_to") / 60)),
-                "Link": "https://www.aviasales.com" + item.get("link")
+                 "Approximate Duration (hours)": round((item.get("duration_to") or 0) / 60, 1),
+                 "Link": "https://www.aviasales.com" + str(item.get("link") or "")
             })
 
         df = pd.DataFrame(rows)
 
         if not df.empty:
-                st.write("Flight results:")
-                st.dataframe(df)
+                st.subheader("Results Overview")
+
+                colA, colB, colC = st.columns(3)
+                colA.metric("Flights Found", len(df))
+                colB.metric("Cheapest Price", f"{currency_choice.strip().upper()} {df['Price'].min()}")
+                colC.metric("Average Price", f"{currency_choice.strip().upper()} {round(df['Price'].mean(), 2)}")
+
+                st.subheader("Flight Results")
+                st.dataframe(df, use_container_width=True)
         else:
             st.warning("No flight data found for that search.")
