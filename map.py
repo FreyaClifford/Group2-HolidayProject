@@ -1,5 +1,3 @@
-API_KEY = "AIzaSyAMLQQIteoJAXEN4QjCeYeaF7Yh7BGY3T8"
-
 import requests
 def search_places(location, page):
     url = "https://places.googleapis.com/v1/places:searchText"
