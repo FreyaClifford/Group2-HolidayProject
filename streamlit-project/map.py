@@ -1,10 +1,18 @@
 import requests
+import os
+
+
 def search_places(location, page):
     url = "https://places.googleapis.com/v1/places:searchText"
 
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if api_key is None:
+        st.write("GOOGLE_API_KEY not set")
+        exit
+
     headers = {
         "Content-Type": "application/json",
-        "X-Goog-Api-Key": API_KEY,
+        "X-Goog-Api-Key": api_key,
         "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.priceLevel,places.location"
     }
 
