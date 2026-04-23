@@ -10,14 +10,15 @@ import time
 
 st.title("Cheap Live Flight Tickets")
 
-from pathlib import Path
+#from pathlib import Path
 
-csv_path = Path(__file__).parent / ".." / "Data" / "iata_codes_clean.csv"
-codes_df = pd.read_csv(csv_path.resolve(), encoding="latin-1")
+#csv_path = Path(__file__).parent / ".." / "Data" / "iata_codes_clean.csv"
+#codes_df = pd.read_csv(csv_path.resolve(), encoding="latin-1")
 #codes_df = pd.read_csv("iata_codes_clean.csv", encoding = "latin-1")
 
 load_dotenv()
-TOKEN = os.getenv("TRAVELPAYOUTS_TOKEN")
+#TRAVELPAYOUTS_TOKEN = "09e2f28e8bb7c3afdd252db783410cae"
+TOKEN = "09e2f28e8bb7c3afdd252db783410cae"    #os.getenv("TRAVELPAYOUTS_TOKEN")
 
 BASE_URL = "https://api.travelpayouts.com/aviasales/v3/prices_for_dates"
 
@@ -52,12 +53,12 @@ if search_clicked:
 
         rows = []
         for item in data.get("data", []):
-            match = codes_df[codes_df["iata_code"] == item.get("destination")]
-            destination_country = match["country_name"].iloc[0] if not match.empty else item.get("destination")
+            #match = codes_df[codes_df["iata_code"] == item.get("destination")]
+            #destination_country = match["country_name"].iloc[0] if not match.empty else item.get("destination")
             
             rows.append({
                 "Starting Place": item.get("origin"),
-                "Destination": destination_country,
+                "Destination": item.get("destination"),
                 "Starting Airport": item.get("origin_airport"),
                 "Destination Airport": item.get("destination_airport"),
                 "Price": item.get("price"),
