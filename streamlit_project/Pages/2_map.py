@@ -13,7 +13,7 @@ def search_places(location, page):
     headers = {
         "Content-Type": "application/json",
         "X-Goog-Api-Key": api_key,
-        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.priceLevel,places.location"
+        "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.priceLevel,places.location,places.websiteUri"
     }
 
     data = {
@@ -32,28 +32,31 @@ def search_places(location, page):
             "rating": place.get("rating", 0),
             "reviews": place.get("userRatingCount", 0),
             "price_level": place.get("priceLevel", -1),
-            "lat": place["location"]["latitude"],
-            "lng": place["location"]["longitude"]
+            "lat": place.get("location", {}).get("latitude", 0),
+            "lng": place.get("location", {}).get("longitude", 0),
+            "website":place.get("websiteUri",None)
         })
 
     return places
-
-
-import pydeck as pdk
 
 def filter(places, min_rating=0, max_price=4):
     filtered = []
 
     for h in places:
-        if h["rating"] >= min_rating:
-        #and h["price_level"] <= max_price:
+        if h["rating"] >= min_rating and h["price_level"] <= max_price:
             filtered.append(h)
-
-    #df = pd.DataFrame(filtered)
-    #return df
     return filtered
 
+import pydeck as pdk
+
+
 def plot_hotels(filtered):
+
+    #If there are no places after fitering dont create a map 
+    if not filtered:
+        st.warning("No locations to display")
+        return
+
     df = pd.DataFrame(filtered)
 
     layer = pdk.Layer(
@@ -62,7 +65,6 @@ def plot_hotels(filtered):
         get_position='[lng, lat]',
         get_radius=120,
         get_fill_color='[255, 0, 200, 160]',
-        #  if page == "Nightclubs" else '[0, 128, 255, 160]',
         pickable=True,
     )
 
@@ -76,13 +78,12 @@ def plot_hotels(filtered):
         layers=[layer],
         initial_view_state=view_state,
         tooltip={"text": "{name}\n⭐ {rating}"},
-        #map_style="mapbox://styles/mapbox/navigation-night-v1" if page == "Nightclubs" else "mapbox://styles/mapbox/streets-v11"
     ))
 
 import streamlit as st
 import pandas as pd
  
-st.title("Hotel and Ammentities Finder")
+st.title("Hotel and Amenities Finder")
 
 # User inputs
 location = st.text_input("Enter location", "London")
@@ -101,7 +102,15 @@ if st.button("Search"):
     st.write(f"Found {len(filtered)} results")
 
     for p in filtered:
-        st.subheader(p["name"])
-        st.write(f"📍 {p['address']}")
-        st.write(f"⭐ {p['rating']}")
+        with st.container():
+            st.subheader(p["name"])
+            st.write(f"📍 {p['address']}")
+            st.write(f"⭐ {p['rating']} ({p['reviews']} reviews)")
+            st.write(f"💰 Price level: {p['price_level']}")
+
+            if p["website"]:
+                st.markdown(f"[🌐 Visit website]({p['website']})")
+
+            st.divider()
+
 
