@@ -78,6 +78,12 @@ if search_clicked:
             #match = codes_df[codes_df["iata_code"] == item.get("destination")]
             #destination_country = match["country_name"].iloc[0] if not match.empty else item.get("destination")
             
+            raw_departure = item.get("departure_at")
+            if raw_departure:
+                formatted_departure = datetime.fromisoformat(raw_departure).strftime("%d %b %Y - %H:%M")
+            else:
+                formatted_departure = "Unknown"
+
             rows.append({
                 "Starting Place": item.get("origin"),
                 "Destination": item.get("destination"),
@@ -88,8 +94,8 @@ if search_clicked:
                 "Departure Time": item.get("departure_at"),
                 "No. of Transfers": item.get("transfers"),
                 "Flight Number": item.get("flight_number"),
-                 "Approximate Duration (hours)": int(round((item.get("duration_to") or 0) / 60)),
-                 "Link": "https://www.aviasales.com" + str(item.get("link") or "")
+                "Approximate Duration (hours)": int(round((item.get("duration_to") or 0) / 60)),
+                "Link": "https://www.aviasales.com" + str(item.get("link") or "")
             })
 
         df = pd.DataFrame(rows)
@@ -105,7 +111,7 @@ if search_clicked:
                     st.markdown(f"### {row['Destination']}")
                     st.caption(f"With **{row['Airline']}** airline")
                     st.write(f"**Route:** {row['Starting Airport']} → {row['Destination Airport']}")
-                    st.write(f"**Departure:** {row['Departure Time']}")
+                    st.write(f"**Departure:** {formatted_departure}")
                     st.write(f"**Flight Number:** {row['Flight Number']}")
 
                 with col2:
