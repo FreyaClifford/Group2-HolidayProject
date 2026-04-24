@@ -1,10 +1,10 @@
 import requests
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 import streamlit as st
 import json
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from datetime import datetime 
 import time
 
@@ -21,7 +21,7 @@ st.caption("Search for low-cost flights for your chosen destination.")
 #codes_df = pd.read_csv("iata_codes_clean.csv", encoding = "latin-1")
 
 #User input
-load_dotenv()
+#load_dotenv()
 #TRAVELPAYOUTS_TOKEN = "09e2f28e8bb7c3afdd252db783410cae"
 TOKEN = "09e2f28e8bb7c3afdd252db783410cae"    #os.getenv("TRAVELPAYOUTS_TOKEN")
 
