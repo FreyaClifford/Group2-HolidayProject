@@ -25,9 +25,16 @@ st.caption("Search for hotels, nightclubs, and activities at your chosen destina
 
 def search_places(location, category):
     url = "https://places.googleapis.com/v1/places:searchText"
-    api_key = os.getenv("GOOGLE_API_KEY")
+    #api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = st.secrets["google"]["GOOGLE_API_KEY"]
     if api_key is None:
         st.error("GOOGLE_API_KEY is not set. Please add it to your environment variables.")
+        st.stop()
+
+    try:
+        api_key = st.secrets["google"]["GOOGLE_API_KEY"]
+    except KeyError:
+        st.error("GOOGLE_API_KEY not found. Add it to .streamlit/secrets.toml")
         st.stop()
 
     headers = {
@@ -40,6 +47,11 @@ def search_places(location, category):
     }
 
     response = requests.post(url, headers=headers, json={"textQuery": f"{category} in {location}"})
+    
+    if response.status_code != 200:
+        st.error(f"API error: {response.text}")
+        return []
+
     data = response.json()
 
     places = []
