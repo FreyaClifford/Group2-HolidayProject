@@ -239,7 +239,7 @@ if search_clicked:
 
     df = pd.DataFrame(rows)
 
-    st.subheader("Flight Results")
+    st.subheader("Recommended Flight Options")
     st.markdown("---")
 
     for _, row in df.iterrows():
@@ -260,7 +260,13 @@ if search_clicked:
                 st.write(f"**Return:** {row['Return Time']}")
 
             with col3:
-                st.markdown(f"[Open Flight Link]({row['Link']})")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.markdown(f"[See current ticket options]({row['Link']})")
 
             st.markdown("---")
 
