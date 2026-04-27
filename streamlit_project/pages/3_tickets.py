@@ -128,7 +128,7 @@ with col1:
 
 with col2:
     direct_bool = st.radio("Do you want direct flights only?", ["Yes", "No"], horizontal=True)
-    currency_choice = st.text_input("Currency", placeholder="ISO-4217 code, e.g. GBP")
+    currency_choice = st.selectbox("Currency", ["GBP", "USD", "EUR", "IDR", "BRL", "THB", "JPY", "AUD", "CAD", "SGD"], index = 0)
 
 trip_type = st.radio("Trip type", ["One-way", "Return"], horizontal=True)
 return_date = ""
@@ -142,7 +142,7 @@ search_clicked = st.button("Search")
 
 # Requesting from api
 if search_clicked:
-    if not currency_choice.strip() or not dest.strip() or not depart.strip():
+    if not dest.strip() or not depart.strip():
         st.error("Please fill in destination, departure date and currency choice before searching.")
         st.stop
     
