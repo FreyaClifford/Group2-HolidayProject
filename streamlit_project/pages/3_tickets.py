@@ -123,14 +123,24 @@ st.markdown("### Search Criteria")
 col1, col2 = st.columns(2)
 
 with col1:
+    origin_choice = st.selectbox("Starting airport/city",[
+        ("LON", "London"),
+        ("MAN", "Manchester"),
+        ("BHX", "Birmingham"),
+        ("EDI", "Edinburgh"),
+        ("GLA", "Glasgow"),
+        ("BRS", "Bristol")
+        ],
+        format_func=lambda x: f"{x[1]} ({x[0]})"
+    )
     dest = st.text_input("Desired destination", placeholder="Enter a city, airport, or country - e.g. Brazil, BR")
     depart = st.text_input("Planned departure date", placeholder="YYYY-MM or YYYY-MM-DD")
 
 with col2:
     direct_bool = st.radio("Do you want direct flights only?", ["Yes", "No"], horizontal=True)
     currency_choice = st.selectbox("Currency", ["GBP", "USD", "EUR", "IDR", "BRL", "THB", "JPY", "AUD", "CAD", "SGD"], index = 0)
+    trip_type = st.radio("Trip type", ["One-way", "Return"], horizontal=True)
 
-trip_type = st.radio("Trip type", ["One-way", "Return"], horizontal=True)
 return_date = ""
 if trip_type == "Return":
     return_date = st.text_input("Planned return date", placeholder="YYYY-MM or YYYY-MM-DD")
@@ -143,7 +153,7 @@ search_clicked = st.button("Search")
 # Requesting from api
 if search_clicked:
     if not dest.strip() or not depart.strip():
-        st.error("Please fill in destination, departure date and currency choice before searching.")
+        st.error("Please fill in destination and departure date before searching.")
         st.stop
     
     if trip_type == "Return" and not return_date.strip():
@@ -159,7 +169,7 @@ if search_clicked:
     st.info(f"Using destination code: {resolved_dest}")
 
     params = {
-        "origin": "LON",
+        "origin": f"{origin_choice[0]}",
         "destination": resolved_dest,
         "departure_at": f"{depart.strip()}",
         "one_way": one_way_choice,
